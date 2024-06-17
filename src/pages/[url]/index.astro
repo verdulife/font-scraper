@@ -1,0 +1,79 @@
+---
+import type { Font } from "@/type";
+import Layout from "@/layouts/Layout.astro";
+
+const base64 = Astro.params.url;
+if (!base64) return Astro.redirect("/");
+const url = atob(base64);
+
+const res = await fetch("http://localhost:4321/api/font-scraper", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ url }),
+});
+
+if (!res.ok) return;
+
+const data = await res.json();
+
+const fonts = data.fonts.map((font: string): Font => {
+  const [filename] = font.split("/").reverse();
+  const [name, ext] = filename.split(".");
+
+  let cleanExt = ext;
+  if (ext.includes("?")) {
+    const [clean] = ext.split("?");
+    cleanExt = clean;
+  }
+
+  return {
+    name,
+    ext: cleanExt,
+    url: font,
+  };
+});
+---
+
+<Layout
+  title="Welcome to Astro."
+  description="Astro is a framework for building fast websites using TypeScript."
+>
+  <main class="flex min-h-screen flex-col items-center gap-10 bg-slate-100">
+    <section class="w-full max-w-md">
+      <form class="mt-48 w-full">
+        <input
+          type="url"
+          placeholder="Website url to scrape fonts..."
+          class="w-full rounded-md border border-gray-300 px-4 py-2 shadow-sm"
+          value={url}
+        />
+      </form>
+    </section>
+
+    <section>
+      <ul class="flex flex-col">
+        {
+          fonts.map((font: Font) => (
+            <li class="flex justify-between border-b border-gray-200 p-4">
+              <main class="flex items-center gap-2">
+                <p>{font.name}</p>
+                <span class="rounded-xl bg-gray-400 px-2 py-1 text-xs font-medium text-white">
+                  {font.ext}
+                </span>
+              </main>
+
+              <a
+                href={font.url}
+                class="flex items-center justify-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+              >
+                Download
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </main>
+</Layout>

@@ -1,0 +1,42 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Welcome to Astro."
+  description="Astro is a framework for building fast websites using TypeScript."
+>
+  <main class="flex min-h-screen justify-center bg-slate-100">
+    <section class="w-full max-w-md">
+      <form class="mt-48 w-full">
+        <input
+          type="url"
+          placeholder="Website url to scrape fonts..."
+          class="w-full rounded-md border border-gray-300 px-4 py-2 shadow-sm"
+        />
+      </form>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  function init_form() {
+    const form = document.querySelector("form");
+    const input = document.querySelector("input");
+
+    if (!form || !input) return;
+
+    form.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+
+      const url = input.value;
+      const a = document.createElement("a");
+      const base64 = btoa(url);
+
+      a.href = `/${base64}`;
+      a.click();
+    });
+  }
+
+  init_form();
+</script>
