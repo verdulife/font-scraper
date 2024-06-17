@@ -2,11 +2,14 @@
 import type { Font } from "@/type";
 import Layout from "@/layouts/Layout.astro";
 
+const uri = new URL(Astro.request.url).origin;
+console.log(uri);
+
 const base64 = Astro.params.url;
 if (!base64) return Astro.redirect("/");
 const url = atob(base64);
 
-const res = await fetch("http://localhost:4321/api/font-scraper", {
+const res = await fetch(`${uri}/api/font-scraper`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -41,7 +44,7 @@ const fonts = data.fonts.map((font: string): Font => {
   description="Astro is a framework for building fast websites using TypeScript."
 >
   <main class="flex min-h-screen flex-col items-center gap-10 bg-slate-100">
-    <section class="w-full max-w-md">
+    <section class="w-full max-w-2xl">
       <form class="mt-48 w-full">
         <input
           type="url"
@@ -52,7 +55,7 @@ const fonts = data.fonts.map((font: string): Font => {
       </form>
     </section>
 
-    <section>
+    <section class="w-full max-w-2xl">
       <ul class="flex flex-col">
         {
           fonts.map((font: Font) => (
@@ -73,7 +76,34 @@ const fonts = data.fonts.map((font: string): Font => {
             </li>
           ))
         }
+        {
+          fonts.length === 0 && (
+            <p class="text-center text-gray-400">No fonts found</p>
+          )
+        }
       </ul>
     </section>
   </main>
 </Layout>
+
+<script>
+  function init_form() {
+    const form = document.querySelector("form");
+    const input = document.querySelector("input");
+
+    if (!form || !input) return;
+
+    form.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+
+      const url = input.value;
+      const a = document.createElement("a");
+      const base64 = btoa(url);
+
+      a.href = `/${base64}`;
+      a.click();
+    });
+  }
+
+  init_form();
+</script>
